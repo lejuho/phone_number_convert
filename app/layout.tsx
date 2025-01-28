@@ -36,6 +36,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
           strategy="afterInteractive" // 로딩 전략 설정
         />
+        <meta name="google-site-verification" content="hJzyi5JnRIrHqt89QGU4Xf7MXRY050jrqVEcIW9PCj0" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
