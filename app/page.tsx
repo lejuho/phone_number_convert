@@ -1,101 +1,69 @@
-import Image from "next/image";
+'use client';
+
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { useState } from 'react';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [phone, setPhone] = useState<string>('');
+  const [convertedNumber, setConvertedNumber] = useState<string>('');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const handleConvert = () => {
+    try {
+      // 한국 번호로 강제 파싱
+      const phoneNumber = parsePhoneNumberFromString(phone, 'KR');
+      
+      if (phoneNumber) {
+        setConvertedNumber(phoneNumber.formatInternational());
+      } else {
+        alert('유효한 한국 전화번호 형식이 아닙니다');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('올바른 번호를 입력해주세요 (예: 01012345678)');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-8">
+      <div className="max-w-md mx-auto bg-white rounded-lg p-6 shadow-md">
+        <h1 className="text-2xl font-bold mb-4">한국 번호 국제형식 변환기</h1>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block mb-2">한국 전화번호 입력</label>
+            <input
+              type="tel"
+              className="w-full p-4 border rounded text-xl"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="예: 01012345678 (국가코드 없이 입력)"
+              pattern="[0-9]*"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          </div>
+
+          <button
+            onClick={handleConvert}
+            className="w-full bg-blue-500 text-white p-4 rounded hover:bg-blue-600 text-lg"
           >
-            Read our docs
-          </a>
+            변환하기
+          </button>
+
+          {convertedNumber && (
+            <div className="mt-4 p-4 bg-gray-50 rounded">
+              <p className="font-semibold">국제 형식:</p>
+              <p className="text-2xl mt-2 font-mono text-blue-600">
+                {convertedNumber}
+              </p>
+              <button
+                onClick={() => navigator.clipboard.writeText(convertedNumber)}
+                className="mt-3 w-full bg-green-100 text-green-600 p-2 rounded hover:bg-green-200"
+              >
+                복사하기
+              </button>
+            </div>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
   );
 }
