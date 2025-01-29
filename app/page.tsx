@@ -1,68 +1,91 @@
 'use client';
 
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+
+import { convertToInternational } from '@/lib/PhoneUtils';
+import dynamic from 'next/dynamic';
+
+// 동적 임포트로 컴포넌트 분리
+const PhoneInput = dynamic(() => import('@/components/PhoneInput'), { ssr: false });
+const ConvertedNumber = dynamic(() => import('@/components/ConvertedNumber'), { ssr: false });
+const FormatGuide = dynamic(() => import('@/components/FormatGuide'), { ssr: false });
+const DetailedGuide = dynamic(() => import('@/components/DetailedGuide'), { ssr: false });
 
 export default function Home() {
-  const [phone, setPhone] = useState<string>('');
-  const [convertedNumber, setConvertedNumber] = useState<string>('');
+  const [mounted, setMounted] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [convertedNumber, setConvertedNumber] = useState('');
+  const [showGuide, setShowGuide] = useState(false);
 
-  const handleConvert = () => {
-    try {
-      // 한국 번호로 강제 파싱
-      const phoneNumber = parsePhoneNumberFromString(phone, 'KR');
-      
-      if (phoneNumber) {
-        setConvertedNumber(phoneNumber.formatInternational());
-      } else {
-        alert('유효한 한국 전화번호 형식이 아닙니다');
-      }
-    } catch (error) {
-      console.error(error);
-      alert('올바른 번호를 입력해주세요 (예: 01012345678)');
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handlePhoneChange = useCallback((value: string) => {
+    setPhone(value);
+  }, []);
+
+  const handleConvert = useCallback(() => {
+    const result = convertToInternational(phone);
+    if (result) {
+      setConvertedNumber(result);
+    } else {
+      alert('유효한 한국 전화번호 형식이 아닙니다');
     }
-  };
+  }, [phone]);
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(convertedNumber);
+    } catch (error) {
+      console.error('복사 실패:', error);
+    }
+  }, [convertedNumber]);
+
+  const toggleGuide = useCallback(() => {
+    setShowGuide(prev => !prev);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-md mx-auto bg-white rounded-lg p-6 shadow-md">
-        <h1 className="text-2xl font-bold mb-4">한국 번호 국제형식 변환기</h1>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="block mb-2">한국 전화번호 입력</label>
-            <input
-              type="tel"
-              className="w-full p-4 border rounded text-xl"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="예: 01012345678 (국가코드 없이 입력)"
-              pattern="[0-9]*"
-            />
-          </div>
-
-          <button
-            onClick={handleConvert}
-            className="w-full bg-blue-500 text-white p-4 rounded hover:bg-blue-600 text-lg"
-          >
-            변환하기
-          </button>
-
-          {convertedNumber && (
-            <div className="mt-4 p-4 bg-gray-50 rounded">
-              <p className="font-semibold">국제 형식:</p>
-              <p className="text-2xl mt-2 font-mono text-blue-600">
-                {convertedNumber}
-              </p>
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-lg p-6 shadow-md mb-6">
+          <h1 className="text-3xl font-bold mb-2">한국 전화번호 국제형식 변환기</h1>
+          <p className="text-gray-600 mb-6">
+            국내 전화번호를 국제 표준 형식으로 쉽게 변환하여 해외 비즈니스나 국제 교류에 활용하세요.
+          </p>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <PhoneInput value={phone} onChange={handlePhoneChange} />
+              
               <button
-                onClick={() => navigator.clipboard.writeText(convertedNumber)}
-                className="mt-3 w-full bg-green-100 text-green-600 p-2 rounded hover:bg-green-200"
+                onClick={handleConvert}
+                className="w-full bg-blue-500 text-white p-4 rounded hover:bg-blue-600 text-lg"
               >
-                복사하기
+                변환하기
               </button>
+
+              {convertedNumber && (
+                <ConvertedNumber 
+                  number={convertedNumber} 
+                  onCopy={handleCopy}
+                />
+              )}
             </div>
-          )}
+
+            <FormatGuide />
+          </div>
         </div>
+
+        <DetailedGuide 
+          showGuide={showGuide} 
+          onToggle={toggleGuide}
+        />
       </div>
     </div>
   );
