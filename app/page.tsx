@@ -10,6 +10,7 @@ const PhoneInput = dynamic(() => import('@/components/PhoneInput'), { ssr: false
 const ConvertedNumber = dynamic(() => import('@/components/ConvertedNumber'), { ssr: false });
 const FormatGuide = dynamic(() => import('@/components/FormatGuide'), { ssr: false });
 const DetailedGuide = dynamic(() => import('@/components/DetailedGuide'), { ssr: false });
+const Navbar = dynamic(() => import('@/components/Navbar'), { ssr: false });
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -58,7 +59,7 @@ export default function Home() {
           <p className="text-gray-600 mb-6">
             국내 전화번호를 국제 표준 형식으로 쉽게 변환하여 해외 비즈니스나 국제 교류에 활용하세요.
           </p>
-          
+
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <PhoneInput value={phone} onChange={handlePhoneChange} />
