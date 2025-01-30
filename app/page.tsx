@@ -10,7 +10,6 @@ const PhoneInput = dynamic(() => import('@/components/PhoneInput'), { ssr: false
 const ConvertedNumber = dynamic(() => import('@/components/ConvertedNumber'), { ssr: false });
 const FormatGuide = dynamic(() => import('@/components/FormatGuide'), { ssr: false });
 const DetailedGuide = dynamic(() => import('@/components/DetailedGuide'), { ssr: false });
-const Navbar = dynamic(() => import('@/components/Navbar'), { ssr: false });
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
